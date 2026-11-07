@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flux Biblia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Noto+Serif+Hebrew:wght@400;600&family=Noto+Serif:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --surface2:#eef1f7; --text:#1b2030; --muted:#667085; --line:#e2e6ef;
+  --accent:#4f46e5; --accent2:#06b6d4; --accentSoft:#eef0ff; --strong:#4f46e5; --sel:#e0e7ff;
+  --hl-yellow:#fff3b0; --hl-green:#d3f5df; --hl-blue:#d6ecff; --hl-pink:#ffdcec;
+  --shadow:0 10px 30px rgba(20,24,40,.12);
+  --fs:19px; --lh:1.75; --rfont:'Literata',Georgia,serif;
+}
+[data-theme="dark"]{
+  --bg:#0e1118; --surface:#161a24; --surface2:#1e2330; --text:#e6e8ef; --muted:#9aa3b5; --line:#2a3040;
+  --accent:#8b8cff; --accent2:#22d3ee; --accentSoft:#23264a; --strong:#a5b4fc; --sel:#2a2f55;
+  --hl-yellow:#4a4220; --hl-green:#1f3d2c; --hl-blue:#1e3450; --hl-pink:#4a2338;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+[data-theme="sepia"]{
+  --bg:#f3ead8; --surface:#fbf5e8; --surface2:#efe3cb; --text:#3b2f20; --muted:#7d6a52; --line:#e2d4b8;
+  --accent:#b45309; --accent2:#a16207; --accentSoft:#f6e4c4; --strong:#9a3412; --sel:#f1d9b0;
+  --hl-yellow:#f7e08a; --hl-green:#d4e7b8; --hl-blue:#cfe0e8; --hl-pink:#f2cfc4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Top bar */
+header{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 12px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:-.01em;margin-right:6px;white-space:nowrap}
+.brand .logo{width:30px;height:30px}
+.brand span b{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ib{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;color:var(--muted)}
+.ib:hover{background:var(--surface2);color:var(--text)}
+.ib.on{color:var(--accent)}
+.ib.on svg{fill:currentColor}
+.refbtn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;background:var(--surface2);font-weight:600;white-space:nowrap}
+.refbtn:hover{background:var(--accentSoft)}
+.seg{display:flex;background:var(--surface2);border-radius:10px;padding:3px}
+.seg button{padding:6px 10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.grow{flex:1}
+@media (max-width:760px){.brand span{display:none}.hide-sm{display:none!important}.bar{flex-wrap:wrap}.seg{order:10;width:100%}.seg button{flex:1}aside{top:auto}}
+
+/* Layout */
+.wrap{max-width:1200px;margin:0 auto;display:flex;gap:0}
+main{flex:1;min-width:0;padding:28px calc(20px + env(safe-area-inset-right)) calc(140px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
+.reader{max-width:720px;margin:0 auto}
+.chhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+.chhead h1{font-family:var(--rfont);font-weight:600;font-size:32px;margin:0;letter-spacing:-.01em}
+.chhead .ver{color:var(--muted);font-size:13px}
+.text{font-family:var(--rfont);font-size:var(--fs);line-height:var(--lh)}
+.v{border-radius:6px;padding:2px 4px;margin:0 -4px;cursor:pointer;transition:background .15s}
+.mode-verse .v{display:block;margin:0 -4px 6px}
+.v .n{font-family:Inter,sans-serif;font-size:.6em;font-weight:700;color:var(--accent);vertical-align:super;margin-right:4px;user-select:none}
+.v.sel{background:var(--sel)!important;box-shadow:inset 0 -2px 0 var(--accent)}
+.v.hl-yellow{background:var(--hl-yellow)}.v.hl-green{background:var(--hl-green)}.v.hl-blue{background:var(--hl-blue)}.v.hl-pink{background:var(--hl-pink)}
+.v .noteic{display:inline-flex;vertical-align:middle;color:var(--accent);margin-left:4px}
+.v .noteic svg{width:15px;height:15px}
+.w{border-bottom:1px dotted color-mix(in srgb,var(--strong) 55%,transparent);cursor:pointer}
+.w:hover,.w.act{color:var(--strong);border-bottom-style:solid}
+.text i{font-style:italic;opacity:.85}.smc{font-variant:small-caps}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:6px 0;border-bottom:1px solid var(--line)}
+.prow .v{display:block;margin:0}
+.phead{display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding-bottom:8px;border-bottom:2px solid var(--line)}
+.reader.par{max-width:1100px}
+@media (max-width:760px){.prow,.phead{grid-template-columns:1fr;gap:4px}.phead{display:none}.prow .v+.v{opacity:.85;font-size:.92em}}
+.sc{font-family:Inter,sans-serif;font-size:.52em;color:var(--strong);vertical-align:super;margin-left:1px;font-weight:600;opacity:.85}
+.hide-codes .sc{display:none}
+.vtitle{font-family:Inter,sans-serif;font-weight:700;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 6px}
+.chfoot{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--surface2);font-weight:600;font-size:14px}
+.btn:hover{background:var(--accentSoft)}
+.btn.pri{background:var(--accent);color:#fff}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.done{background:color-mix(in srgb,#16a34a 18%,var(--surface));color:#15803d}
+[data-theme="dark"] .btn.done{color:#4ade80}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn.danger{color:#dc2626}
+
+/* Side panel */
+aside{width:400px;flex:none;border-left:1px solid var(--line);background:var(--surface);position:sticky;top:55px;height:calc(100vh - 55px);overflow:auto;display:none}
+aside.open{display:block}
+.ph{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.ph h3{margin:0;font-size:15px;flex:1}
+.pb{padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+@media (max-width:980px){
+  aside{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:72vh;border-left:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:var(--shadow);z-index:40}
+}
+.lemma{font-size:34px;line-height:1.3;margin:2px 0 4px;font-family:'Noto Serif Hebrew','Noto Serif',serif}
+.code{display:inline-block;font-weight:700;font-size:12px;padding:3px 8px;border-radius:999px;background:var(--accentSoft);color:var(--accent)}
+.kv{margin:14px 0}
+.kv .k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px}
+.kv .val{line-height:1.55}
+.lk{color:var(--accent);font-weight:600;cursor:pointer}
+.lk:hover{text-decoration:underline}
+.ilist .it{padding:10px 0;border-bottom:1px solid var(--line)}
+.ilist .it .r{font-weight:700;font-size:13px;color:var(--accent);cursor:pointer}
+.ilist .it .t{font-family:var(--rfont);line-height:1.55;margin-top:3px}
+.mark{background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:3px;padding:0 1px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.wordrow{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;cursor:pointer}
+.wordrow:hover{background:var(--surface2)}
+.wordrow .en{font-weight:600;min-width:90px}
+.wordrow .or{font-family:'Noto Serif Hebrew','Noto Serif',serif;font-size:18px}
+
+/* Selection action bar */
+.actbar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);transition:transform .2s;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;padding:6px;display:flex;gap:2px;z-index:30;max-width:calc(100vw - 16px);overflow-x:auto}
+.actbar.show{transform:translateX(-50%) translateY(0)}
+.actbar .a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:600;color:var(--muted);min-width:58px}
+.actbar .a:hover{background:var(--surface2);color:var(--text)}
+.actbar .cnt{align-self:center;padding:0 10px;font-weight:700;font-size:13px;white-space:nowrap}
+.dot{width:20px;height:20px;border-radius:50%;border:1px solid var(--line)}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(10,12,20,.45);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:calc(6vh + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.ov.show{display:flex}
+.modal{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);width:100%;max-width:720px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+.mh{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.mh h2{margin:0;font-size:17px;flex:1}
+.mb{padding:16px;overflow:auto}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{padding:7px 12px;border-radius:999px;background:var(--surface2);font-weight:600;font-size:13px}
+.tabs button.on{background:var(--accent);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.grid.num{grid-template-columns:repeat(auto-fill,minmax(52px,1fr))}
+.cell{padding:10px;border-radius:10px;background:var(--surface2);text-align:left;font-weight:500;font-size:14px;position:relative}
+.grid.num .cell{text-align:center;font-weight:600}
+.cell:hover{background:var(--accentSoft);color:var(--accent)}
+.cell.cur{outline:2px solid var(--accent)}
+.cell.read{background:color-mix(in srgb,#16a34a 20%,var(--surface2))}
+.cell .sub{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.crumbs{display:flex;gap:6px;align-items:center;margin-bottom:12px;font-weight:600}
+.field{display:flex;gap:8px;align-items:center;background:var(--surface2);border-radius:12px;padding:4px 4px 4px 12px}
+.field input{flex:1;border:0;background:none;outline:none;padding:9px 0;font-size:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select.s{background:var(--surface2);border:0;border-radius:10px;padding:8px 10px}
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.set .l b{display:block}
+.set .l span{font-size:13px;color:var(--muted)}
+.themes{display:flex;gap:8px}
+.th{width:64px;height:46px;border-radius:10px;border:2px solid var(--line);display:flex;align-items:flex-end;padding:5px;font-size:11px;font-weight:700}
+.th.on{border-color:var(--accent)}
+.sw{width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;transition:.2s;flex:none}
+.sw::after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--accent)}
+.sw.on::after{left:21px}
+textarea.ta{width:100%;min-height:140px;border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:12px;resize:vertical;outline:none;line-height:1.5}
+textarea.ta:focus{border-color:var(--accent)}
+.prog{height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--surface2);border-radius:14px;padding:14px}
+.stat b{font-size:24px;display:block}
+.stat span{font-size:12px;color:var(--muted)}
+.bk{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;padding:6px 0;cursor:pointer}
+.bk:hover{color:var(--accent)}
+.empty{text-align:center;color:var(--muted);padding:30px 10px}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.loading{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:var(--bg);z-index:100}
+.loading .logo{width:64px;height:64px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.92);opacity:.7}}
+.menu{position:absolute;right:12px;top:52px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:6px;min-width:230px;display:none;z-index:45}
+.menu.show{display:block}
+.menu button{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;border-radius:10px;text-align:left;font-weight:500}
+.menu button:hover{background:var(--surface2)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.notecard{background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:10px}
+.notecard .refs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.notecard .date{font-size:12px;color:var(--muted)}
+.notecard .body{white-space:pre-wrap;line-height:1.55;margin:6px 0 8px}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;background:var(--accentSoft);color:var(--accent);font-weight:600;font-size:12px;cursor:pointer}
+.navfab{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));width:46px;height:46px;border-radius:50%;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;z-index:15;color:var(--muted)}
+.navfab:hover{color:var(--accent)}
+.navfab.l{left:16px}.navfab.r{right:16px}
+body.selecting .navfab{display:none}
+</style>
+</head>
+<body>
+<div class="loading" id="loading">
+  <svg class="logo" viewBox="0 0 48 48" style="stroke:none"><defs><linearGradient id="lg0" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect x="2" y="2" width="44" height="44" rx="13" fill="url(#lg0)"/><path d="M13 15c5-2 8-1 11 2 3-3 6-4 11-2v19c-5-2-8-1-11 2-3-3-6-4-11-2z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 17v19" stroke="#fff" stroke-width="2.4"/><path d="M16 22c2-1 4-1 5 0M16 27c2-1 4-1 5 0M27 22c1-1 3-1 5 0M27 27c1-1 3-1 5 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></svg>
+  <div class="muted" id="loadmsg">Carregando Flux Biblia…</div>
+</div>
+
+<header>
+  <div class="bar" style="position:relative">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 48 48" style="stroke:none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect x="2" y="2" width="44" height="44" rx="13" fill="url(#lg1)"/><path d="M13 15c5-2 8-1 11 2 3-3 6-4 11-2v19c-5-2-8-1-11 2-3-3-6-4-11-2z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M24 17v19" stroke="#fff" stroke-width="2.4"/></svg>
+      <span><b>Flux</b> Biblia</span>
+    </div>
+    <button class="ib hide-sm" id="prevBtn" title="Capítulo anterior (←)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="refbtn" id="refBtn"><span id="refLabel">—</span><svg viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M6 9l6 6 6-6"/></svg></button>
+    <button class="ib hide-sm" id="nextBtn" title="Próximo capítulo (→)"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="grow"></div>
+    <div class="seg" id="verSeg">
+      <button data-v="acf" title="Almeida Corrigida Fiel">ACF</button>
+      <button data-v="nvi" title="Nova Versão Internacional">NVI</button>
+      <button data-v="par" title="ACF e NVI lado a lado">Paralelo</button>
+    </div>
+    <button class="ib" id="bmBtn" title="Marcar capítulo"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+    <button class="ib" id="searchBtn" title="Buscar (/)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+    <button class="ib" id="menuBtn" title="Menu"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>
+    <div class="menu" id="menu">
+      <button data-m="bookmarks"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Ver marcações</button>
+      <button data-m="notes"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg>Anotações</button>
+      <button data-m="highlights"><svg viewBox="0 0 24 24"><path d="M9 11l-6 6v3h3l6-6M14 6l4 4-7 7-4-4z"/></svg>Destaques</button>
+      <button data-m="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progresso de leitura</button>
+      <button data-m="lexicon"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5M9 7h6"/></svg>Léxico Strong</button>
+      <hr>
+      <button data-m="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Configurações</button>
+      <button data-m="backup"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Backup dos dados</button>
+      <button data-m="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Sobre</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <main><div class="reader" id="reader"></div></main>
+  <aside id="panel"><div class="ph"><h3 id="pTitle">Strong</h3><button class="ib" id="pBack" style="display:none" title="Voltar"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><button class="ib" id="pClose" title="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="pb" id="pBody"></div></aside>
+</div>
+
+<button class="navfab l" id="fabPrev" title="Capítulo anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+<button class="navfab r" id="fabNext" title="Próximo capítulo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+
+<div class="actbar" id="actbar">
+  <div class="cnt" id="selCnt">1</div>
+  <button class="a" data-a="strong"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5"/></svg>Strong</button>
+  <button class="a" data-a="xref"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>Referências</button>
+  <button class="a" data-a="note"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg>Anotar</button>
+  <button class="a" data-a="hl-yellow"><span class="dot" style="background:#fde68a"></span>Amarelo</button>
+  <button class="a" data-a="hl-green"><span class="dot" style="background:#86efac"></span>Verde</button>
+  <button class="a" data-a="hl-blue"><span class="dot" style="background:#93c5fd"></span>Azul</button>
+  <button class="a" data-a="hl-pink"><span class="dot" style="background:#f9a8d4"></span>Rosa</button>
+  <button class="a" data-a="hl-none"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>Limpar</button>
+  <button class="a" data-a="copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>Copiar</button>
+  <button class="a" data-a="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>Fechar</button>
+</div>
+
+<div class="ov" id="ov"><div class="modal"><div class="mh"><button class="ib" id="mBack" style="display:none"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><h2 id="mTitle"></h2><button class="ib" id="mClose"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="mb" id="mBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= Estado ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("flux:"+k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("flux:"+k, JSON.stringify(v)); }catch(e){} }
+};
+const DEF = {theme:"light", fs:19, lh:1.75, font:"serif", codes:true, layout:"verse", version:"acf", pt:"acf"};
+let cfg = Object.assign({}, DEF, store.get("cfg", {}));
+if (!["acf","nvi","par"].includes(cfg.version)) cfg.version = "acf";
+if (!["acf","nvi"].includes(cfg.pt)) cfg.pt = "acf";
+let pos = store.get("pos", {b:42, c:1});
+let data = {highlights:{}, notes:[], bookmarks:[], read:{}};
+Object.assign(data, store.get("data", {}));
+const save = () => { store.set("data", data); };
+const saveCfg = () => { store.set("cfg", cfg); };
+
+const D = {meta:null, acf:null, nvi:null, kjv:null, strong:null, xref:null, conc:null};
+const loaders = {};
+function load(name){
+  if (D[name]) return Promise.resolve(D[name]);
+  if (!loaders[name]) loaders[name] = fetch("data/"+name+".json").then(r => { if(!r.ok) throw new Error(name); return r.json(); }).then(j => (D[name] = j));
+  return loaders[name];
+}
+const B = () => D.meta.books;
+const refStr = (b,c,v,e) => `${B()[b].n} ${c}${v ? ":"+v : ""}${e ? "-"+e : ""}`;
+const refShort = (b,c,v) => `${B()[b].a} ${c}${v ? ":"+v : ""}`;
+const key = (b,c,v) => `${b}.${c}.${v}`;
+const parseKey = k => k.split(".").map(Number);
+
+/* ================= Texto ================= */
+const TOK = /([^{}]*?)\{([HG0-9,]+)\}/g;
+function kjvPlain(s){ return s.replace(/\{[HG0-9,]+\}/g, ""); }
+function kjvTokens(s){
+  const out = []; let m, last = 0; TOK.lastIndex = 0;
+  while ((m = TOK.exec(s))){
+    let w = m[1]; const pre = (w.match(/^[^A-Za-z0-9(']*/)||[""])[0];
+    if (pre) out.push({t:pre}); w = w.slice(pre.length);
+    out.push({t:w, c:m[2].split(",")}); last = TOK.lastIndex;
+  }
+  if (last < s.length) out.push({t:s.slice(last)});
+  return out;
+}
+function kjvHTML(s, b, c, v){
+  return kjvTokens(s).map(t => t.c
+    ? `<span class="w" data-s="${t.c.join(",")}">${esc(t.t)}</span>${t.c.map(x=>`<span class="sc">${x}</span>`).join("")}`
+    : esc(t.t)).join("");
+}
+function verseText(ver, b, c, v){
+  if (ver === "kjv"){ const s = D.kjv?.[b]?.[c-1]?.[v-1]; return s == null ? "" : kjvPlain(s); }
+  return (D[ver]?.[b]?.[c-1]?.[v-1] ?? "").replace(/<\/?[is]>/g, "");
+}
+function ptHTML(ver, b, c, v){
+  return esc(D[ver]?.[b]?.[c-1]?.[v-1] ?? "").replace(/&lt;(\/?)([is])&gt;/g, (m, sl, t) => `<${sl}${t === "s" ? "span" : "i"}${!sl && t === "s" ? ' class="smc"' : ""}>`);
+}
+const PTV = () => cfg.pt === "nvi" ? "nvi" : "acf";
+const VNAME = {acf:"Almeida Corrigida Fiel", nvi:"Nova Versão Internacional", kjv:"King James (1769) com Strong", par:"ACF · NVI"};
+const VSHORT = {acf:"ACF", nvi:"NVI", kjv:"KJV"};
+const curVer = () => cfg.version === "par" ? PTV() : cfg.version;
+
+/* ================= Leitura ================= */
+let selected = new Set();
+function render(scrollTo){
+  const b = pos.b, c = pos.c, book = B()[b];
+  $("#refLabel").textContent = `${book.n} ${c}`;
+  document.title = `${book.n} ${c} · Flux Biblia`;
+  const bm = data.bookmarks.some(x => x.b === b && x.c === c);
+  $("#bmBtn").classList.toggle("on", bm);
+  document.querySelectorAll("#verSeg button").forEach(x => x.classList.toggle("on", x.dataset.v === cfg.version));
+  const r = $("#reader");
+  r.className = "reader" + (cfg.version === "par" ? " par" : "");
+  const n = cfg.version === "par" ? Math.max(D.acf?.[b]?.[c-1]?.length || 0, D.nvi?.[b]?.[c-1]?.length || 0) : (D[cfg.version]?.[b]?.[c-1]?.length || book.v[c-1]);
+  const noteSet = notesByVerse();
+  const vName = VNAME[cfg.version];
+  let h = `<div class="chhead"><h1>${esc(book.n)} ${c}</h1><div class="ver">${vName}</div></div>`;
+  const cls = v => { const hl = data.highlights[key(b,c,v)]; return "v" + (hl ? " hl-"+hl : "") + (selected.has(v) ? " sel" : ""); };
+  const nic = v => noteSet.has(key(b,c,v)) ? `<span class="noteic" data-note="${key(b,c,v)}" title="Ver anotação"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg></span>` : "";
+  if (cfg.version === "par"){
+    h += `<div class="text"><div class="phead"><div>Almeida Corrigida Fiel</div><div>Nova Versão Internacional</div></div>`;
+    for (let v = 1; v <= n; v++) h += `<div class="prow"><span class="${cls(v)}" data-v="${v}"><span class="n">${v}</span>${ptHTML("acf",b,c,v)}${nic(v)}</span><span class="${cls(v)}" data-v="${v}"><span class="n">${v}</span>${ptHTML("nvi",b,c,v)}</span></div>`;
+    h += `</div>`;
+  } else {
+  h += `<div class="text mode-${cfg.layout} ${cfg.codes ? "" : "hide-codes"}">`;
+  for (let v = 1; v <= n; v++){
+    const body = cfg.version === "kjv" ? kjvHTML(D.kjv[b][c-1][v-1] || "") : ptHTML(cfg.version,b,c,v);
+    h += `<span class="${cls(v)}" data-v="${v}"><span class="n">${v}</span>${body}${nic(v)}</span> `;
+  }
+  h += `</div>`;
+  }
+  const isRead = !!data.read[`${b}.${c}`];
+  h += `<div class="chfoot">
+    <button class="btn" id="fPrev"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Anterior</button>
+    <button class="btn ${isRead ? "done" : "pri"}" id="fRead">${isRead ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Capítulo lido' : 'Marcar como lido'}</button>
+    <button class="btn" id="fNext">Próximo<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>`;
+  r.innerHTML = h;
+  $("#fPrev").onclick = () => step(-1);
+  $("#fNext").onclick = () => step(1);
+  $("#fRead").onclick = () => { const k = `${b}.${c}`; if (data.read[k]) delete data.read[k]; else data.read[k] = new Date().toISOString(); save(); render(); if (data.read[k]) toast("Capítulo marcado como lido"); };
+  if (scrollTo){
+    const el = r.querySelector(`.v[data-v="${scrollTo}"]`);
+    if (el){ el.scrollIntoView({block:"center"}); el.animate([{background:"var(--sel)"},{background:"transparent"}],{duration:1800}); }
+  } else if (scrollTo !== false) window.scrollTo(0,0);
+  store.set("pos", pos);
+}
+async function ensureVersion(){
+  const need = cfg.version === "par" ? ["acf","nvi"] : [cfg.version];
+  if (need.some(n => !D[n])){ $("#reader").innerHTML = `<div class="empty">Carregando texto…</div>`; await Promise.all(need.map(load)); }
+}
+async function go(b, c, v){
+  pos = {b, c}; clearSel();
+  await ensureVersion();
+  render(v);
+}
+function step(d){
+  let {b, c} = pos; c += d;
+  if (c < 1){ b--; if (b < 0) return; c = B()[b].c; }
+  else if (c > B()[b].c){ b++; if (b >= 66) return; c = 1; }
+  go(b, c);
+}
+
+/* ================= Seleção ================= */
+function clearSel(){ selected.clear(); document.querySelectorAll(".v.sel").forEach(e => e.classList.remove("sel")); updAct(); }
+function updAct(){
+  const n = selected.size;
+  $("#actbar").classList.toggle("show", n > 0);
+  document.body.classList.toggle("selecting", n > 0);
+  if (n){
+    const vs = [...selected].sort((a,b)=>a-b);
+    $("#selCnt").textContent = `${B()[pos.b].a} ${pos.c}:${compactRange(vs)}`;
+  }
+}
+function compactRange(vs){
+  const out = []; let s = vs[0], p = vs[0];
+  for (let i = 1; i <= vs.length; i++){
+    if (vs[i] === p + 1){ p = vs[i]; continue; }
+    out.push(s === p ? `${s}` : `${s}-${p}`); s = p = vs[i];
+  }
+  return out.join(",");
+}
+$("#reader").addEventListener("click", e => {
+  const ni = e.target.closest(".noteic");
+  if (ni){ openNotesFor(ni.dataset.note); return; }
+  const w = e.target.closest(".w");
+  if (w){
+    document.querySelectorAll(".w.act").forEach(x => x.classList.remove("act")); w.classList.add("act");
+    const codes = w.dataset.s.split(",");
+    showStrong(codes[0], codes.length > 1 ? codes : null, w.textContent);
+    return;
+  }
+  const v = e.target.closest(".v");
+  if (!v) return;
+  const n = +v.dataset.v;
+  if (selected.has(n)) selected.delete(n); else selected.add(n);
+  document.querySelectorAll(`.v[data-v="${n}"]`).forEach(x => x.classList.toggle("sel", selected.has(n)));
+  updAct();
+});
+$("#actbar").addEventListener("click", async e => {
+  const a = e.target.closest(".a")?.dataset.a; if (!a) return;
+  const vs = [...selected].sort((x,y)=>x-y), b = pos.b, c = pos.c;
+  if (a === "close") return clearSel();
+  if (a.startsWith("hl-")){
+    vs.forEach(v => { const k = key(b,c,v); if (a === "hl-none") delete data.highlights[k]; else data.highlights[k] = a.slice(3); });
+    save(); clearSel(); render(false); return;
+  }
+  if (a === "copy"){
+    const ver = curVer();
+    await ensureVersion();
+    const txt = vs.map(v => `${v} ${verseText(ver,b,c,v)}`).join("\n") + `\n— ${B()[b].n} ${c}:${compactRange(vs)} (${VSHORT[ver]})`;
+    try{ await navigator.clipboard.writeText(txt); toast("Versículos copiados"); }
+    catch(err){ openModal("Copiar versículos", `<textarea class="ta" readonly>${esc(txt)}</textarea><p class="muted small">Selecione o texto e copie.</p>`); }
+    clearSel(); return;
+  }
+  if (a === "strong") return showVerseWords(b, c, vs[0]);
+  if (a === "xref") return showXref(b, c, vs[0]);
+  if (a === "note") return noteEditor(null, vs.map(v => key(b,c,v)));
+});
+
+/* ================= Painel lateral ================= */
+const panelStack = [];
+function openPanel(title, html, push = true, fn){
+  const p = $("#panel");
+  if (push && p.classList.contains("open") && panelStack.length) {}
+  if (push) panelStack.push({title, html, fn});
+  $("#pTitle").textContent = title; $("#pBody").innerHTML = html; p.classList.add("open"); p.scrollTop = 0;
+  $("#pBack").style.display = panelStack.length > 1 ? "" : "none";
+  if (fn) fn($("#pBody"));
+}
+$("#pClose").onclick = () => { $("#panel").classList.remove("open"); panelStack.length = 0; document.querySelectorAll(".w.act").forEach(x => x.classList.remove("act")); };
+$("#pBack").onclick = () => { panelStack.pop(); const t = panelStack[panelStack.length-1]; if (t) openPanel(t.title, t.html, false, t.fn); };
+function resetPanel(){ panelStack.length = 0; }
+
+function langOf(code, e){ return code[0] === "G" ? "Grego" : (/Aramaic/.test(e?.[3] || "") ? "Aramaico" : "Hebraico"); }
+function linkCodes(s){ return esc(s).replace(/\b([HG]\d{1,5})\b/g, '<span class="lk" data-code="$1">$1</span>'); }
+function bindCodeLinks(root){
+  root.querySelectorAll("[data-code]").forEach(el => el.onclick = () => showStrong(el.dataset.code, null, null, true));
+  root.querySelectorAll("[data-go]").forEach(el => el.onclick = () => { const [b,c,v] = parseKey(el.dataset.go); go(b,c,v); if (innerWidth <= 980) $("#pClose").click(); closeModal(); });
+}
+async function showStrong(code, alts, word, push){
+  if (!push) resetPanel();
+  if (!D.strong){ openPanel("Strong", `<div class="empty">Carregando léxico…</div>`, false); await load("strong"); }
+  const e = D.strong[code];
+  if (!e){ openPanel(code, `<div class="empty">Sem verbete para ${esc(code)}.</div>`); return; }
+  const [lemma, xlit, pron, deriv, def, kjvdef] = e;
+  let h = "";
+  if (alts) h += `<div class="row small" style="margin-bottom:10px">${alts.map(a => `<span class="chip" data-code="${a}" style="${a===code?"background:var(--accent);color:#fff":""}">${a}</span>`).join("")}</div>`;
+  if (word) h += `<div class="muted small">Palavra na KJV: <b style="color:var(--text)">${esc(word)}</b></div>`;
+  h += `<div class="lemma" dir="auto">${esc(lemma)}</div>
+  <div class="row"><span class="code">${code}</span><span class="muted small">${langOf(code,e)}</span></div>
+  <div class="kv"><div class="k">Transliteração</div><div class="val"><i>${esc(xlit)}</i></div></div>
+  ${pron ? `<div class="kv"><div class="k">Pronúncia</div><div class="val">${esc(pron)}</div></div>` : ""}
+  ${def ? `<div class="kv"><div class="k">Definição de Strong</div><div class="val">${linkCodes(def)}</div></div>` : ""}
+  ${deriv ? `<div class="kv"><div class="k">Origem da palavra</div><div class="val">${linkCodes(deriv)}</div></div>` : ""}
+  ${kjvdef ? `<div class="kv"><div class="k">Uso na Bíblia (KJV)</div><div class="val">${linkCodes(kjvdef)}</div></div>` : ""}
+  <div class="row" style="margin-top:16px"><button class="btn sm pri" id="concBtn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Ver ocorrências</button><button class="btn sm" id="cpStrong">Copiar verbete</button></div>
+  <p class="muted small" style="margin-top:16px">Definições do dicionário de James Strong (1890), em inglês.</p>`;
+  openPanel(`Strong ${code}`, h, true, root => {
+    bindCodeLinks(root);
+    root.querySelector("#concBtn").onclick = () => showConc(code);
+    root.querySelector("#cpStrong").onclick = async () => {
+      const t = `${code} ${lemma} (${xlit}) — ${def}\nOrigem: ${deriv}\nKJV: ${kjvdef}`;
+      try{ await navigator.clipboard.writeText(t); toast("Verbete copiado"); }catch(err){ toast("Não foi possível copiar"); }
+    };
+  });
+}
+async function buildConc(){
+  if (D.conc) return D.conc;
+  await load("kjv");
+  const m = new Map(), re = /\{([HG0-9,]+)\}/g;
+  D.kjv.forEach((bk, b) => bk.forEach((ch, ci) => ch.forEach((s, vi) => {
+    let x; const seen = new Set(); re.lastIndex = 0;
+    while ((x = re.exec(s))) for (const c of x[1].split(",")){ if (seen.has(c)) continue; seen.add(c); let a = m.get(c); if (!a) m.set(c, a = []); a.push(b*1e6 + (ci+1)*1e3 + vi+1); }
+  })));
+  return (D.conc = m);
+}
+const unpack = n => [Math.floor(n/1e6), Math.floor(n/1e3)%1e3, n%1e3];
+async function showConc(code, limit = 200){
+  openPanel(`Ocorrências de ${code}`, `<div class="empty">Indexando…</div>`, true);
+  await buildConc(); await load(PTV());
+  const list = D.conc.get(code) || [];
+  const render = lim => {
+    const byBook = {}; list.forEach(n => { const b = unpack(n)[0]; byBook[b] = (byBook[b]||0)+1; });
+    let h = `<p><b>${list.length}</b> versículos na KJV contêm <span class="code">${code}</span>.</p>
+      <div class="row small" style="margin-bottom:8px">${Object.entries(byBook).slice(0,40).map(([b,n]) => `<span class="muted">${B()[b].a} ${n}</span>`).join(" · ")}</div><div class="ilist">`;
+    list.slice(0, lim).forEach(n => {
+      const [b,c,v] = unpack(n);
+      const s = D.kjv[b][c-1][v-1];
+      const t = kjvTokens(s).map(t => t.c && t.c.includes(code) ? `<span class="mark">${esc(t.t)}</span>` : esc(t.t)).join("");
+      h += `<div class="it"><div class="r" data-go="${key(b,c,v)}">${refStr(b,c,v)}</div><div class="t">${t}</div><div class="t muted small">${esc(verseText(PTV(),b,c,v))}</div></div>`;
+    });
+    h += `</div>`;
+    if (list.length > lim) h += `<button class="btn" id="more" style="margin-top:12px;width:100%;justify-content:center">Mostrar mais (${list.length - lim})</button>`;
+    return h;
+  };
+  let lim = limit;
+  const fn = root => { bindCodeLinks(root); const m = root.querySelector("#more"); if (m) m.onclick = () => { lim += 200; root.innerHTML = render(lim); fn(root); }; };
+  panelStack.pop();
+  openPanel(`Ocorrências de ${code}`, render(lim), true, fn);
+}
+async function showVerseWords(b, c, v){
+  resetPanel();
+  openPanel("Palavras originais", `<div class="empty">Carregando…</div>`, false);
+  await Promise.all([load("kjv"), load("strong"), load(PTV())]);
+  const toks = kjvTokens(D.kjv[b][c-1][v-1] || "").filter(t => t.c);
+  let h = `<div class="muted small" style="margin-bottom:4px">${refStr(b,c,v)}</div>
+    <div style="font-family:var(--rfont);line-height:1.6;margin-bottom:6px">${esc(verseText(PTV(),b,c,v))}</div>
+    <div class="muted small" style="font-family:var(--rfont);margin-bottom:14px">${esc(kjvPlain(D.kjv[b][c-1][v-1] || ""))}</div>`;
+  toks.forEach(t => t.c.forEach(code => {
+    const e = D.strong[code] || [];
+    h += `<div class="wordrow" data-code="${code}"><div class="en">${esc(t.t)}</div><div style="flex:1"><div><span class="or" dir="auto">${esc(e[0]||"")}</span> <i class="muted">${esc(e[1]||"")}</i> <span class="code">${code}</span></div><div class="small muted">${esc((e[4]||"").slice(0,120))}</div></div></div>`;
+  }));
+  if (!toks.length) h += `<div class="empty">Sem números de Strong neste versículo.</div>`;
+  openPanel(`Strong · ${refShort(b,c,v)}`, h, true, root => root.querySelectorAll(".wordrow").forEach(el => el.onclick = () => showStrong(el.dataset.code, null, el.querySelector(".en").textContent, true)));
+}
+async function showXref(b, c, v){
+  resetPanel();
+  openPanel("Referências cruzadas", `<div class="empty">Carregando…</div>`, false);
+  await Promise.all([load("xref"), ensureVersion()]);
+  const list = D.xref[key(b,c,v)] || [];
+  const ver = curVer();
+  let h = `<div class="muted small">${refStr(b,c,v)}</div><div style="font-family:var(--rfont);line-height:1.6;margin:4px 0 12px">${esc(verseText(ver,b,c,v))}</div><div class="ilist">`;
+  list.forEach(([rb, rc, rv, re]) => {
+    let t = verseText(ver, rb, rc, rv);
+    if (re) for (let i = rv+1; i <= re && i < rv+4; i++) t += " " + verseText(ver, rb, rc, i);
+    if (re && re > rv+3) t += " …";
+    h += `<div class="it"><div class="r" data-go="${key(rb,rc,rv)}">${refStr(rb,rc,rv,re)}</div><div class="t">${esc(t)}</div></div>`;
+  });
+  h += `</div>`;
+  if (!list.length) h += `<div class="empty">Nenhuma referência cruzada para este versículo.</div>`;
+  else h += `<p class="muted small">Referências: OpenBible.info (CC BY).</p>`;
+  openPanel(`Referências · ${refShort(b,c,v)}`, h, true, bindCodeLinks);
+}
+
+/* ================= Modal ================= */
+let modalBack = null;
+function openModal(title, html, fn, back){
+  $("#mTitle").textContent = title; $("#mBody").innerHTML = html; $("#ov").classList.add("show");
+  modalBack = back || null; $("#mBack").style.display = back ? "" : "none";
+  $("#mBody").scrollTop = 0;
+  if (fn) fn($("#mBody"));
+}
+function closeModal(){ $("#ov").classList.remove("show"); }
+$("#mClose").onclick = closeModal;
+$("#mBack").onclick = () => modalBack && modalBack();
+$("#ov").addEventListener("click", e => { if (e.target.id === "ov") closeModal(); });
+
+/* Seletor de referência */
+function picker(tab){
+  tab = tab || (pos.b >= 39 ? "nt" : "at");
+  const books = B().map((bk, i) => ({...bk, i})).filter(x => tab === "at" ? x.i < 39 : x.i >= 39);
+  let h = `<div class="tabs"><button data-t="at" class="${tab==="at"?"on":""}">Antigo Testamento</button><button data-t="nt" class="${tab==="nt"?"on":""}">Novo Testamento</button></div><div class="grid">`;
+  books.forEach(x => {
+    const read = Array.from({length:x.c}, (_,k) => data.read[`${x.i}.${k+1}`]).filter(Boolean).length;
+    h += `<button class="cell ${x.i===pos.b?"cur":""}" data-b="${x.i}">${esc(x.n)}<span class="sub">${x.c} cap.${read ? ` · ${Math.round(read/x.c*100)}% lido` : ""}</span></button>`;
+  });
+  h += `</div>`;
+  openModal("Escolher livro", h, root => {
+    root.querySelectorAll("[data-t]").forEach(el => el.onclick = () => picker(el.dataset.t));
+    root.querySelectorAll("[data-b]").forEach(el => el.onclick = () => pickChapter(+el.dataset.b, tab));
+  });
+}
+function pickChapter(b, tab){
+  const bk = B()[b];
+  let h = `<div class="grid num">`;
+  for (let c = 1; c <= bk.c; c++) h += `<button class="cell ${b===pos.b&&c===pos.c?"cur":""} ${data.read[`${b}.${c}`]?"read":""}" data-c="${c}">${c}</button>`;
+  h += `</div>`;
+  openModal(bk.n, h, root => root.querySelectorAll("[data-c]").forEach(el => el.onclick = () => pickVerse(b, +el.dataset.c, tab)), () => picker(tab));
+}
+function pickVerse(b, c, tab){
+  const n = B()[b].v[c-1];
+  let h = `<div class="row" style="margin-bottom:12px"><button class="btn pri" id="readCh">Ler capítulo ${c}</button></div><div class="grid num">`;
+  for (let v = 1; v <= n; v++) h += `<button class="cell" data-v="${v}">${v}</button>`;
+  h += `</div>`;
+  openModal(`${B()[b].n} ${c}`, h, root => {
+    root.querySelector("#readCh").onclick = () => { closeModal(); go(b, c); };
+    root.querySelectorAll("[data-v]").forEach(el => el.onclick = () => { closeModal(); go(b, c, +el.dataset.v); });
+  }, () => pickChapter(b, tab));
+}
+
+/* Busca */
+const fold = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const norm = s => fold(s).replace(/<\/?[is]>/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+let searchState = {q:"", ver:null, scope:"all"};
+const NIDX = {};
+function normIndex(ver){
+  if (NIDX[ver]) return NIDX[ver];
+  const out = [];
+  D[ver].forEach((bk, b) => bk.forEach((ch, ci) => ch.forEach((t, vi) => out.push([b, ci+1, vi+1, " " + norm(t) + " "]))));
+  return (NIDX[ver] = out);
+}
+function findBook(name){
+  const raw = name.toLowerCase().replace(/\s+/g, "").replace(/\.$/, "");
+  const f = fold(raw).replace(/^(i{1,3})(?=[a-z])/, m => String(m.length));
+  if (!f) return -1;
+  const list = B().map((x, i) => ({i, a:x.a.toLowerCase(), fa:fold(x.a), fn:fold(x.n.replace(/\s+/g, ""))}));
+  let m = list.find(x => x.a === raw) || list.find(x => x.fn === f) || list.find(x => x.fa === f);
+  if (!m) m = list.find(x => x.fn.startsWith(f));
+  if (!m && f.length >= 3) m = list.find(x => x.fn.includes(f));
+  return m ? m.i : -1;
+}
+function parseRef(q){
+  const m = q.trim().match(/^((?:[1-3]|i{1,3})?\s*[^\d:]+?)\.?\s*(\d+)\s*(?:[:.,\s]\s*(\d+)?\s*(?:-\s*(\d+))?)?\s*$/i);
+  if (!m) return null;
+  const b = findBook(m[1]);
+  if (b < 0) return null;
+  const c = +m[2]; if (c < 1 || c > B()[b].c) return null;
+  const max = B()[b].v[c-1];
+  let v = m[3] ? +m[3] : null, e = m[4] ? +m[4] : null;
+  if (v && (v < 1 || v > max + 1)) return null;
+  if (e && (e <= v || !v)) e = null;
+  if (e) e = Math.min(e, max + 1);
+  return {b, c, v, e};
+}
+function searchModal(){
+  const s = searchState;
+  s.ver = curVer();
+  const h = `<form id="sf" autocomplete="off"><div class="field"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sq" placeholder="Ex.: João 3:16 · Rm 8 · as coisas que não são · G25" value="${esc(s.q)}"><button type="button" class="ib" id="sclear" title="Limpar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="row" style="margin-top:10px"><select class="s" id="sv"><option value="acf">ACF</option><option value="nvi">NVI</option></select>
+    <select class="s" id="ss"><option value="all">Bíblia toda</option><option value="at">Antigo Testamento</option><option value="nt">Novo Testamento</option><option value="book">Livro atual (${esc(B()[pos.b].n)})</option></select></div></form>
+    <div id="sprev" style="margin-top:14px"></div><div id="sres" style="margin-top:6px"></div>`;
+  openModal("Buscar", h, root => {
+    const inp = root.querySelector("#sq"), sv = root.querySelector("#sv"), ss = root.querySelector("#ss");
+    sv.value = s.ver; ss.value = s.scope;
+    inp.focus(); inp.select();
+    let t;
+    const live = () => { clearTimeout(t); t = setTimeout(() => { s.q = inp.value; s.ver = sv.value; s.scope = ss.value; liveSearch(root); }, 180); };
+    inp.addEventListener("input", live);
+    sv.onchange = live; ss.onchange = live;
+    root.querySelector("#sclear").onclick = () => { inp.value = ""; s.q = ""; liveSearch(root); inp.focus(); };
+    root.querySelector("#sf").onsubmit = e => {
+      e.preventDefault(); s.q = inp.value;
+      const q = s.q.trim();
+      const sc = q.toUpperCase().match(/^([HG])0*(\d{1,5})$/);
+      if (sc){ closeModal(); showStrong(sc[1] + sc[2]); return; }
+      const r = /\d/.test(q) && parseRef(q);
+      if (r){ closeModal(); go(r.b, r.c, r.v || undefined); return; }
+      const first = root.querySelector("#sres [data-go]");
+      if (first) first.click();
+    };
+    liveSearch(root);
+  });
+}
+async function liveSearch(root){
+  const s = searchState, q = s.q.trim();
+  const prev = root.querySelector("#sprev"), out = root.querySelector("#sres");
+  if (!prev) return;
+  if (!q){ prev.innerHTML = ""; out.innerHTML = `<p class="muted small">Digite uma referência (João 3:16, 1Co 13, Sl 23:1-3), uma palavra ou um trecho do versículo. Acentos e pontuação não importam.</p>`; return; }
+  await load(s.ver);
+  if (s.q.trim() !== q) return;
+  // Strong
+  const sc = q.toUpperCase().match(/^([HG])0*(\d{1,5})$/);
+  if (sc){
+    await load("strong");
+    const code = sc[1] + sc[2], e = D.strong[code];
+    prev.innerHTML = e ? `<div class="notecard" style="cursor:pointer" id="spStrong"><div class="row"><span class="code">${code}</span><span class="or" dir="auto" style="font-size:20px">${esc(e[0])}</span><i class="muted">${esc(e[1])}</i></div><div class="small" style="margin-top:6px">${esc(e[4])}</div><div class="small muted" style="margin-top:6px">Enter para abrir o verbete</div></div>` : `<div class="empty">Sem verbete para ${code}.</div>`;
+    const sp = prev.querySelector("#spStrong"); if (sp) sp.onclick = () => { closeModal(); showStrong(code); };
+    out.innerHTML = ""; return;
+  }
+  // Referência
+  const r = /\d/.test(q) && parseRef(q);
+  if (r){
+    const {b, c} = r, max = D[s.ver][b][c-1].length;
+    const from = r.v || 1, to = r.v ? Math.min(r.e || r.v, max) : Math.min(max, 3);
+    let txt = "";
+    for (let v = from; v <= to; v++) txt += `<span class="n" style="font-size:.65em;font-weight:700;color:var(--accent);vertical-align:super;margin-right:3px">${v}</span>${ptHTML(s.ver,b,c,v)} `;
+    if (!r.v && max > 3) txt += `<span class="muted">…</span>`;
+    prev.innerHTML = `<div class="notecard" id="spRef" style="cursor:pointer;border:1px solid var(--accent)">
+      <div class="row" style="justify-content:space-between"><b style="color:var(--accent)">${refStr(b, c, r.v, r.e && Math.min(r.e, max))}</b><span class="small muted">${VSHORT[s.ver]}</span></div>
+      <div style="font-family:var(--rfont);line-height:1.6;margin-top:6px">${txt}</div>
+      <div class="row" style="margin-top:10px"><button class="btn sm pri" id="spGo">${r.v ? "Ir para o versículo" : "Abrir capítulo"}</button><span class="small muted">ou pressione Enter</span></div></div>`;
+    prev.querySelector("#spRef").onclick = () => { closeModal(); go(b, c, r.v || undefined); };
+    out.innerHTML = ""; return;
+  }
+  prev.innerHTML = "";
+  if (norm(q).length < 2){ out.innerHTML = ""; return; }
+  const res = textSearch(q, s.ver, s.scope);
+  let alt = null;
+  if (!res.total){
+    const other = s.ver === "acf" ? "nvi" : "acf";
+    await load(other);
+    const r2 = textSearch(q, other, s.scope);
+    if (r2.total) alt = {ver:other, res:r2};
+  }
+  if (s.q.trim() !== q) return;
+  const show = alt ? alt.res : res, ver = alt ? alt.ver : s.ver;
+  if (!show.total){ out.innerHTML = `<div class="empty">Nada encontrado para “${esc(q)}”.</div>`; return; }
+  let lim = 100;
+  const draw = () => {
+    let h = `<p class="muted small">${alt ? `Nada na ${VSHORT[s.ver]}; encontrado na <b>${VSHORT[ver]}</b>. ` : ""}${show.total} resultado${show.total === 1 ? "" : "s"}${show.exact ? ` · ${show.exact} com o trecho exato` : ""}.</p><div class="ilist">`;
+    show.list.slice(0, lim).forEach(([b, c, v]) => h += `<div class="it" data-go="${key(b,c,v)}" style="cursor:pointer"><div class="r">${refStr(b,c,v)}</div><div class="t">${markText(verseText(ver,b,c,v), show.terms, show.phrase)}</div></div>`);
+    h += `</div>`;
+    if (show.list.length > lim) h += `<button class="btn" id="smore" style="margin-top:10px;width:100%;justify-content:center">Mostrar mais (${show.list.length - lim})</button>`;
+    out.innerHTML = h; bindCodeLinks(out);
+    const m = out.querySelector("#smore"); if (m) m.onclick = () => { lim += 100; draw(); };
+  };
+  draw();
+}
+function textSearch(q, ver, scope){
+  const phrase = norm(q.replace(/^"|"$/g, ""));
+  const terms = phrase.split(" ").filter(Boolean);
+  const exact = [], partial = [];
+  const P = " " + phrase + " ", Pn = " " + phrase;
+  for (const [b, c, v, t] of normIndex(ver)){
+    if (scope === "at" && b >= 39) continue;
+    if (scope === "nt" && b < 39) continue;
+    if (scope === "book" && b !== pos.b) continue;
+    if (t.includes(P) || (terms.length > 1 && t.includes(Pn))) exact.push([b, c, v]);
+    else if (terms.length > 1 && !/^".*"$/.test(q.trim()) && terms.every(x => t.includes(" " + x))) partial.push([b, c, v]);
+    else if (terms.length === 1 && t.includes(" " + terms[0])) partial.push([b, c, v]);
+  }
+  return {list:exact.concat(partial), total:exact.length + partial.length, exact:terms.length > 1 ? exact.length : 0, terms, phrase};
+}
+function markText(t, terms, phrase){
+  const f = fold(t);
+  const marks = new Array(t.length).fill(false);
+  const words = [];
+  f.replace(/[a-z0-9]+/g, (w, i) => { words.push([w, i]); return w; });
+  const pw = phrase.split(" ");
+  let hit = false;
+  if (pw.length > 1){
+    for (let i = 0; i + pw.length <= words.length; i++){
+      let ok = true;
+      for (let k = 0; k < pw.length; k++){ const w = words[i+k][0]; if (k === pw.length - 1 ? !w.startsWith(pw[k]) : w !== pw[k]){ ok = false; break; } }
+      if (ok){ hit = true; const s0 = words[i][1], e0 = words[i+pw.length-1][1] + words[i+pw.length-1][0].length; for (let x = s0; x < e0; x++) marks[x] = true; }
+    }
+  }
+  if (!hit) words.forEach(([w, i]) => { if (terms.some(x => w.startsWith(x))) for (let k = i; k < i + w.length; k++) marks[k] = true; });
+  let o = "", on = false;
+  for (let i = 0; i < t.length; i++){ if (marks[i] !== on){ o += marks[i] ? '<span class="mark">' : "</span>"; on = marks[i]; } o += esc(t[i]); }
+  return o + (on ? "</span>" : "");
+}
+
+/* Marcações de capítulo */
+$("#bmBtn").onclick = () => {
+  const i = data.bookmarks.findIndex(x => x.b === pos.b && x.c === pos.c);
+  if (i >= 0){ data.bookmarks.splice(i,1); toast("Marcação removida"); }
+  else { data.bookmarks.unshift({b:pos.b, c:pos.c, at:new Date().toISOString()}); toast("Capítulo marcado"); }
+  save(); render(false);
+};
+const fmtDate = s => { try{ return new Date(s).toLocaleDateString("pt-BR", {day:"2-digit", month:"short", year:"numeric"}); }catch(e){ return s; } };
+function bookmarksModal(){
+  let h = data.bookmarks.length ? `<div class="ilist">` + data.bookmarks.map((x,i) => `<div class="it row" style="justify-content:space-between"><div><div class="r" data-go="${key(x.b,x.c,1)}">${refStr(x.b,x.c)}</div><div class="muted small">Marcado em ${fmtDate(x.at)}</div></div><button class="ib" data-del="${i}" title="Remover"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div>`).join("") + `</div>`
+    : `<div class="empty">Nenhum capítulo marcado.<br>Use o ícone de marcador no topo para marcar o capítulo atual.</div>`;
+  openModal("Marcações", h, root => {
+    bindCodeLinks(root);
+    root.querySelectorAll("[data-del]").forEach(el => el.onclick = () => { data.bookmarks.splice(+el.dataset.del, 1); save(); render(false); bookmarksModal(); });
+  });
+}
+
+/* Anotações */
+function notesByVerse(){ const s = new Set(); data.notes.forEach(n => n.refs.forEach(r => s.add(r))); return s; }
+function refsLabel(refs){
+  const g = {};
+  refs.forEach(r => { const [b,c,v] = parseKey(r); (g[`${b}.${c}`] = g[`${b}.${c}`] || []).push(v); });
+  return Object.entries(g).map(([bc, vs]) => { const [b,c] = bc.split(".").map(Number); return {b, c, v:Math.min(...vs), label:`${B()[b].a} ${c}:${compactRange(vs.sort((x,y)=>x-y))}`}; });
+}
+function noteEditor(id, refs){
+  const note = id ? data.notes.find(n => n.id === id) : null;
+  refs = note ? note.refs : refs;
+  const ver = curVer();
+  const preview = refs.slice(0,6).map(r => { const [b,c,v] = parseKey(r); return `<div class="small" style="font-family:var(--rfont);margin-bottom:4px"><b>${v}</b> ${esc(verseText(ver,b,c,v))}</div>`; }).join("");
+  const h = `<div class="row" style="margin-bottom:8px">${refsLabel(refs).map(x => `<span class="chip">${x.label}</span>`).join("")}</div>
+    <div style="margin-bottom:12px;max-height:160px;overflow:auto">${preview}</div>
+    <textarea class="ta" id="nt" placeholder="Escreva sua anotação…">${esc(note?.text || "")}</textarea>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">${note ? `<button class="btn danger" id="ndel">Excluir</button>` : ""}<button class="btn" id="ncancel">Cancelar</button><button class="btn pri" id="nsave">Salvar</button></div>`;
+  openModal(note ? "Editar anotação" : "Nova anotação", h, root => {
+    const ta = root.querySelector("#nt"); setTimeout(() => ta.focus(), 30);
+    root.querySelector("#ncancel").onclick = closeModal;
+    root.querySelector("#nsave").onclick = () => {
+      const text = ta.value.trim(); if (!text){ toast("Escreva algo antes de salvar"); return; }
+      if (note){ note.text = text; note.date = new Date().toISOString(); }
+      else data.notes.unshift({id:Date.now().toString(36), date:new Date().toISOString(), text, refs});
+      save(); closeModal(); clearSel(); render(false); toast("Anotação salva");
+    };
+    const d = root.querySelector("#ndel");
+    if (d) d.onclick = () => confirmBox("Excluir esta anotação?", () => { data.notes = data.notes.filter(n => n.id !== id); save(); render(false); notesModal(); });
+  });
+  if (!D[ver]) ensureVersion().then(() => noteEditor(id, refs));
+}
+function noteCard(n){
+  return `<div class="notecard"><div class="refs">${refsLabel(n.refs).map(x => `<span class="chip" data-go="${key(x.b,x.c,x.v)}">${x.label}</span>`).join("")}</div><div class="body">${esc(n.text)}</div><div class="row" style="justify-content:space-between"><span class="date">${fmtDate(n.date)}</span><button class="btn sm" data-edit="${n.id}">Editar</button></div></div>`;
+}
+function notesModal(filter){
+  const list = filter ? data.notes.filter(n => n.refs.includes(filter)) : data.notes;
+  let h = `<div class="field" style="margin-bottom:12px"><input id="nq" placeholder="Filtrar anotações…"></div><div id="nl"></div>`;
+  openModal(filter ? "Anotações do versículo" : `Anotações (${data.notes.length})`, h, root => {
+    const draw = q => {
+      const f = fold(q || "");
+      const l = list.filter(n => !f || fold(n.text).includes(f));
+      root.querySelector("#nl").innerHTML = l.length ? l.map(noteCard).join("") : `<div class="empty">Nenhuma anotação ainda.<br>Toque em um ou mais versículos e escolha “Anotar”.</div>`;
+      bindCodeLinks(root);
+      root.querySelectorAll("[data-edit]").forEach(el => el.onclick = () => noteEditor(el.dataset.edit));
+    };
+    root.querySelector("#nq").oninput = e => draw(e.target.value); draw("");
+  });
+}
+function openNotesFor(k){ notesModal(k); }
+
+/* Destaques */
+const HLN = {yellow:"Amarelo", green:"Verde", blue:"Azul", pink:"Rosa"};
+async function highlightsModal(color){
+  await load(PTV());
+  const all = Object.entries(data.highlights).map(([k,c]) => [parseKey(k), c]).sort((a,b) => (a[0][0]-b[0][0]) || (a[0][1]-b[0][1]) || (a[0][2]-b[0][2]));
+  const list = color ? all.filter(x => x[1] === color) : all;
+  let h = `<div class="tabs"><button data-c="" class="${!color?"on":""}">Todos (${all.length})</button>${Object.entries(HLN).map(([c,n]) => `<button data-c="${c}" class="${color===c?"on":""}">${n}</button>`).join("")}</div><div class="ilist">`;
+  list.forEach(([[b,c,v], col]) => h += `<div class="it" style="border-left:4px solid var(--hl-${col});padding-left:10px"><div class="r" data-go="${key(b,c,v)}">${refStr(b,c,v)}</div><div class="t">${esc(verseText(PTV(),b,c,v))}</div></div>`);
+  h += `</div>`;
+  if (!list.length) h += `<div class="empty">Nenhum versículo destacado.</div>`;
+  openModal("Destaques", h, root => { bindCodeLinks(root); root.querySelectorAll("[data-c]").forEach(el => el.onclick = () => highlightsModal(el.dataset.c)); });
+}
+
+/* Progresso */
+function progressModal(){
+  const total = B().reduce((s,x) => s + x.c, 0);
+  const readN = Object.keys(data.read).length;
+  const cnt = (from, to) => { let t = 0, r = 0; for (let b = from; b < to; b++){ t += B()[b].c; for (let c = 1; c <= B()[b].c; c++) if (data.read[`${b}.${c}`]) r++; } return [r, t]; };
+  const [ar, at] = cnt(0,39), [nr, nt] = cnt(39,66);
+  const pct = (a,b) => b ? Math.round(a/b*1000)/10 : 0;
+  const dates = Object.values(data.read).map(d => d.slice(0,10));
+  const days = new Set(dates);
+  let streak = 0; const d = new Date();
+  for (;;){ const s = new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10); if (days.has(s)){ streak++; d.setDate(d.getDate()-1); } else break; }
+  let h = `<div class="stats"><div class="stat"><b>${pct(readN,total)}%</b><span>da Bíblia (${readN}/${total} capítulos)</span></div><div class="stat"><b>${pct(ar,at)}%</b><span>Antigo Testamento</span></div><div class="stat"><b>${pct(nr,nt)}%</b><span>Novo Testamento</span></div></div>
+  <div class="prog" style="margin-bottom:8px"><i style="width:${pct(readN,total)}%"></i></div>
+  <p class="muted small">Sequência atual: <b>${streak}</b> dia${streak===1?"":"s"} · Dias com leitura: <b>${days.size}</b></p>`;
+  [["Antigo Testamento",0,39],["Novo Testamento",39,66]].forEach(([n,f,t]) => {
+    h += `<h3 style="font-size:14px;margin:18px 0 6px">${n}</h3>`;
+    for (let b = f; b < t; b++){ const [r, tt] = cnt(b, b+1); h += `<div class="bk" data-b="${b}"><span>${esc(B()[b].n)}</span><div class="prog"><i style="width:${pct(r,tt)}%"></i></div><span class="small muted" style="text-align:right">${r}/${tt}</span></div>`; }
+  });
+  h += `<div class="row" style="margin-top:18px"><button class="btn danger sm" id="resetP">Zerar progresso</button></div>`;
+  openModal("Progresso de leitura", h, root => {
+    root.querySelectorAll("[data-b]").forEach(el => el.onclick = () => progressBook(+el.dataset.b));
+    root.querySelector("#resetP").onclick = () => confirmBox("Apagar todo o progresso de leitura?", () => { data.read = {}; save(); render(false); progressModal(); });
+  });
+}
+function progressBook(b){
+  const bk = B()[b];
+  let h = `<p class="muted small">Toque para marcar ou desmarcar. Toque duas vezes para abrir o capítulo.</p><div class="row" style="margin-bottom:12px"><button class="btn sm" id="allR">Marcar todos</button><button class="btn sm" id="noneR">Desmarcar todos</button></div><div class="grid num">`;
+  for (let c = 1; c <= bk.c; c++) h += `<button class="cell ${data.read[`${b}.${c}`]?"read":""}" data-c="${c}">${c}</button>`;
+  h += `</div>`;
+  openModal(bk.n, h, root => {
+    root.querySelectorAll("[data-c]").forEach(el => {
+      el.onclick = () => { const k = `${b}.${el.dataset.c}`; if (data.read[k]) delete data.read[k]; else data.read[k] = new Date().toISOString(); el.classList.toggle("read", !!data.read[k]); save(); };
+      el.ondblclick = () => { closeModal(); go(b, +el.dataset.c); };
+    });
+    root.querySelector("#allR").onclick = () => { for (let c = 1; c <= bk.c; c++) data.read[`${b}.${c}`] = data.read[`${b}.${c}`] || new Date().toISOString(); save(); progressBook(b); };
+    root.querySelector("#noneR").onclick = () => { for (let c = 1; c <= bk.c; c++) delete data.read[`${b}.${c}`]; save(); progressBook(b); };
+  }, progressModal);
+  render(false);
+}
+
+/* Léxico */
+async function lexiconModal(){
+  openModal("Léxico Strong", `<div class="empty">Carregando…</div>`);
+  await load("strong");
+  const h = `<div class="field"><input id="lq" placeholder="Número (H1254, G26) ou palavra em inglês (love, light…)"></div><div class="tabs" style="margin-top:10px"><button data-l="" class="on">Todos</button><button data-l="H">Hebraico/Aramaico</button><button data-l="G">Grego</button></div><div id="lr" class="ilist"></div>`;
+  openModal("Léxico Strong", h, root => {
+    let lang = "";
+    const keys = Object.keys(D.strong).sort((a,b) => a[0] === b[0] ? +a.slice(1) - +b.slice(1) : a < b ? -1 : 1);
+    const draw = () => {
+      const q = fold(root.querySelector("#lq").value.trim());
+      const code = q.toUpperCase().match(/^([HG])0*(\d+)$/);
+      let list;
+      if (code) list = keys.filter(k => k === code[1]+code[2]);
+      else list = keys.filter(k => (!lang || k[0] === lang) && (!q || fold(D.strong[k].join(" ")).includes(q)));
+      root.querySelector("#lr").innerHTML = `<p class="muted small">${list.length} verbetes</p>` + list.slice(0, 150).map(k => { const e = D.strong[k]; return `<div class="wordrow" data-code="${k}"><span class="code">${k}</span><div style="flex:1"><span class="or" dir="auto">${esc(e[0])}</span> <i class="muted">${esc(e[1])}</i><div class="small muted">${esc((e[4]||"").slice(0,110))}</div></div></div>`; }).join("");
+      root.querySelectorAll(".wordrow").forEach(el => el.onclick = () => { closeModal(); showStrong(el.dataset.code); });
+    };
+    root.querySelector("#lq").oninput = draw;
+    root.querySelectorAll("[data-l]").forEach(el => el.onclick = () => { lang = el.dataset.l; root.querySelectorAll("[data-l]").forEach(x => x.classList.toggle("on", x === el)); draw(); });
+    draw(); setTimeout(() => root.querySelector("#lq").focus(), 30);
+  });
+}
+
+/* Configurações */
+function applyCfg(){
+  document.documentElement.dataset.theme = cfg.theme;
+  const r = document.documentElement.style;
+  r.setProperty("--fs", cfg.fs + "px"); r.setProperty("--lh", cfg.lh);
+  r.setProperty("--rfont", cfg.font === "serif" ? "'Literata',Georgia,serif" : "Inter,system-ui,sans-serif");
+}
+function settingsModal(){
+  const sw = (id, on) => `<button class="sw ${on?"on":""}" id="${id}"></button>`;
+  const h = `
+  <div class="set"><div class="l"><b>Tema</b><span>Aparência do app</span></div><div class="themes">
+    <button class="th ${cfg.theme==="light"?"on":""}" data-th="light" style="background:#fff;color:#1b2030">Claro</button>
+    <button class="th ${cfg.theme==="sepia"?"on":""}" data-th="sepia" style="background:#f3ead8;color:#3b2f20">Sépia</button>
+    <button class="th ${cfg.theme==="dark"?"on":""}" data-th="dark" style="background:#161a24;color:#e6e8ef">Escuro</button></div></div>
+  <div class="set"><div class="l"><b>Tamanho do texto</b><span id="fsv">${cfg.fs}px</span></div><div class="row"><button class="btn sm" id="fsm">A−</button><button class="btn sm" id="fsp">A+</button></div></div>
+  <div class="set"><div class="l"><b>Espaçamento entre linhas</b></div><select class="s" id="lhs"><option value="1.5">Compacto</option><option value="1.75">Normal</option><option value="2.05">Amplo</option></select></div>
+  <div class="set"><div class="l"><b>Fonte de leitura</b></div><select class="s" id="fts"><option value="serif">Serifada</option><option value="sans">Sem serifa</option></select></div>
+  <div class="set"><div class="l"><b>Um versículo por linha</b><span>Desligado mostra em parágrafo corrido</span></div>${sw("lay", cfg.layout==="verse")}</div>
+  <div class="set" style="border:0"><div class="l"><b>Restaurar padrões</b></div><button class="btn sm" id="rst">Restaurar</button></div>`;
+  openModal("Configurações", h, root => {
+    const upd = () => { saveCfg(); applyCfg(); render(false); };
+    root.querySelectorAll("[data-th]").forEach(el => el.onclick = () => { cfg.theme = el.dataset.th; root.querySelectorAll("[data-th]").forEach(x => x.classList.toggle("on", x === el)); upd(); });
+    const fs = d => { cfg.fs = Math.max(13, Math.min(32, cfg.fs + d)); root.querySelector("#fsv").textContent = cfg.fs + "px"; upd(); };
+    root.querySelector("#fsm").onclick = () => fs(-1); root.querySelector("#fsp").onclick = () => fs(1);
+    const lh = root.querySelector("#lhs"); lh.value = String(cfg.lh); lh.onchange = () => { cfg.lh = +lh.value; upd(); };
+    const ft = root.querySelector("#fts"); ft.value = cfg.font; ft.onchange = () => { cfg.font = ft.value; upd(); };
+    root.querySelector("#lay").onclick = e => { cfg.layout = cfg.layout === "verse" ? "para" : "verse"; e.currentTarget.classList.toggle("on"); upd(); };
+    root.querySelector("#rst").onclick = () => { const v = cfg.version; cfg = Object.assign({}, DEF, {version:v}); upd(); settingsModal(); };
+  });
+}
+
+/* Backup */
+function backupModal(){
+  const json = JSON.stringify({app:"Flux Biblia", v:1, exported:new Date().toISOString(), data, cfg}, null, 1);
+  const h = `<p class="small muted">Seus marcadores, anotações, destaques e progresso ficam salvos neste navegador. Guarde uma cópia para não perder ou para levar a outro aparelho.</p>
+  <h3 style="font-size:14px">Exportar</h3><textarea class="ta" id="bx" readonly>${esc(json)}</textarea>
+  <div class="row" style="margin:8px 0 18px"><button class="btn pri sm" id="bcopy">Copiar backup</button><span class="small muted">${data.notes.length} anotações · ${Object.keys(data.highlights).length} destaques · ${data.bookmarks.length} marcações · ${Object.keys(data.read).length} capítulos lidos</span></div>
+  <h3 style="font-size:14px">Importar</h3><p class="small muted">Cole um backup abaixo ou escolha um arquivo .json. Os dados atuais serão substituídos.</p>
+  <textarea class="ta" id="bi" placeholder="Cole aqui o backup…" style="min-height:90px"></textarea>
+  <div class="row" style="margin-top:8px"><input type="file" id="bf" accept=".json,application/json" class="small"><button class="btn sm" id="bimp">Importar</button></div>`;
+  openModal("Backup dos dados", h, root => {
+    root.querySelector("#bcopy").onclick = async () => { try{ await navigator.clipboard.writeText(json); toast("Backup copiado"); }catch(e){ root.querySelector("#bx").select(); toast("Selecione e copie o texto"); } };
+    root.querySelector("#bf").onchange = e => { const f = e.target.files[0]; if (f) f.text().then(t => root.querySelector("#bi").value = t); };
+    root.querySelector("#bimp").onclick = () => {
+      try{
+        const o = JSON.parse(root.querySelector("#bi").value);
+        if (!o.data) throw 0;
+        data = Object.assign({highlights:{}, notes:[], bookmarks:[], read:{}}, o.data);
+        if (o.cfg) cfg = Object.assign({}, DEF, o.cfg);
+        save(); saveCfg(); applyCfg(); render(false); closeModal(); toast("Backup importado");
+      }catch(e){ toast("Backup inválido"); }
+    };
+  });
+}
+
+/* Sobre */
+function aboutModal(){
+  openModal("Sobre", `<div style="text-align:center;margin-bottom:14px">${document.querySelector(".brand .logo").outerHTML.replace('class="logo"','style="width:64px;height:64px"')}<h2 style="margin:8px 0 2px">Flux Biblia</h2><div class="muted small">Bíblia de estudo com números de Strong</div></div>
+  <p>Leia em português na Almeida Corrigida Fiel ou na NVI, selecione um versículo e toque em “Strong” para ver as palavras hebraicas ou gregas originais, suas definições e todas as ocorrências.</p>
+  <h3 style="font-size:14px">Recursos</h3>
+  <ul class="small" style="line-height:1.8"><li>Almeida Corrigida Fiel, NVI e modo paralelo ACF/NVI</li><li>Léxico Strong hebraico/aramaico e grego com concordância</li><li>Referências cruzadas por versículo</li><li>Anotações, destaques em 4 cores e marcações de capítulo</li><li>Progresso de leitura com estatísticas</li><li>Busca por palavra, frase, referência ou número Strong</li><li>Temas claro, sépia e escuro; ajustes de leitura</li></ul>
+  <h3 style="font-size:14px">Textos e licenças</h3>
+  <ul class="small" style="line-height:1.8">
+  <li><b>Almeida Corrigida Fiel (ACF)</b> — © Sociedade Bíblica Trinitariana do Brasil. Usada com permissão. Palavras em itálico foram acrescentadas pelos tradutores para dar sentido ao texto.</li>
+  <li><b>Nova Versão Internacional (NVI®)</b> — © Biblica, Inc. Usada com permissão. Todos os direitos reservados.</li>
+  <li><b>King James Version (1769)</b> com números de Strong — domínio público; usada internamente para ligar cada versículo aos números de Strong (módulo KJV da CrossWire).</li>
+  <li><b>Dicionários de Strong</b> (1890) — domínio público; versão digital © Open Scriptures, CC BY-SA.</li>
+  <li><b>Referências cruzadas</b> — OpenBible.info, CC BY.</li>
+  <li>Dados reunidos pelo projeto scrollmapper/bible_databases.</li></ul>
+  <h3 style="font-size:14px">Atalhos</h3><p class="small">← → capítulo anterior/próximo · / buscar · Esc fechar</p>`);
+}
+
+/* Confirmação */
+function confirmBox(msg, ok){
+  openModal("Confirmar", `<p>${esc(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn" id="cn">Cancelar</button><button class="btn pri" id="cy">Confirmar</button></div>`, root => {
+    root.querySelector("#cn").onclick = closeModal; root.querySelector("#cy").onclick = () => { closeModal(); ok(); };
+  });
+}
+let tt;
+function toast(m){ const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800); }
+
+/* ================= Eventos ================= */
+$("#refBtn").onclick = () => picker();
+$("#prevBtn").onclick = $("#fabPrev").onclick = () => step(-1);
+$("#nextBtn").onclick = $("#fabNext").onclick = () => step(1);
+$("#searchBtn").onclick = searchModal;
+$("#verSeg").addEventListener("click", async e => {
+  const v = e.target.closest("button")?.dataset.v; if (!v || v === cfg.version) return;
+  cfg.version = v; if (v === "acf" || v === "nvi") cfg.pt = v; saveCfg(); await ensureVersion(); render(false);
+});
+$("#menuBtn").onclick = e => { e.stopPropagation(); $("#menu").classList.toggle("show"); };
+document.addEventListener("click", e => { if (!e.target.closest("#menu")) $("#menu").classList.remove("show"); });
+$("#menu").addEventListener("click", e => {
+  const m = e.target.closest("button")?.dataset.m; if (!m) return;
+  $("#menu").classList.remove("show");
+  ({bookmarks:bookmarksModal, notes:() => notesModal(), highlights:() => highlightsModal(), progress:progressModal, lexicon:lexiconModal, settings:settingsModal, backup:backupModal, about:aboutModal})[m]();
+});
+document.addEventListener("keydown", e => {
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+  if (e.key === "Escape"){ if ($("#ov").classList.contains("show")) closeModal(); else if ($("#panel").classList.contains("open")) $("#pClose").click(); else clearSel(); return; }
+  if (typing || $("#ov").classList.contains("show")) return;
+  if (e.key === "ArrowLeft") step(-1);
+  else if (e.key === "ArrowRight") step(1);
+  else if (e.key === "/"){ e.preventDefault(); searchModal(); }
+});
+
+/* ================= Início ================= */
+(async function init(){
+  applyCfg();
+  try{
+    await load("meta");
+    if (!(pos.b >= 0 && pos.b < 66 && pos.c >= 1 && pos.c <= B()[pos.b].c)) pos = {b:42, c:1};
+    await ensureVersion();
+    render();
+    $("#loading").remove();
+    setTimeout(() => { load("strong"); load("kjv"); load(PTV()); load("xref"); }, 800);
+  }catch(err){
+    $("#loadmsg").textContent = "Não foi possível carregar os dados. Recarregue a página.";
+    console.error(err);
+  }
+})();
+</script>
+</body>
+</html>

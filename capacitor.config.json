@@ -1,0 +1,10 @@
+{
+  "appId": "com.fluxbiblia.app",
+  "appName": "Flux Biblia",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f6f7fb",
+    "scrollEnabled": true
+  }
+}
