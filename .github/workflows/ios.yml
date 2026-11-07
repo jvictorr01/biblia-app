@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-15
@@ -65,3 +68,12 @@ jobs:
           name: FluxBiblia-ipa
           path: FluxBiblia.ipa
           retention-days: 30
+
+      - name: Publicar na página de Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Flux Biblia 1.0.${{ github.run_number }}
+          body: "Baixe o FluxBiblia.ipa abaixo e instale pelo Sideloadly com seu Apple ID."
+          files: FluxBiblia.ipa
+          make_latest: true

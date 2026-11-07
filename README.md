@@ -6,7 +6,7 @@ Bíblia de estudo (ACF, NVI e paralelo) com números de Strong, referências cru
 
 Cada push na branch `main` dispara o workflow **Gerar .ipa (iOS, sem assinatura)** no GitHub Actions. Também dá para rodar manualmente em **Actions → Gerar .ipa → Run workflow**.
 
-Ao terminar, baixe o artefato **FluxBiblia-ipa** na página da execução. Descompacte o .zip para obter `FluxBiblia.ipa`.
+Ao terminar, o `FluxBiblia.ipa` fica disponível em **Releases** (link direto da versão mais recente: `releases/latest/download/FluxBiblia.ipa`) e também como artefato na página da execução.
 
 ## Instalar no iPhone (Sideloadly)
 
