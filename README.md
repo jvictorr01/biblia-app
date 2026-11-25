@@ -2,11 +2,11 @@
 
 Bíblia de estudo (ACF, NVI e paralelo) com números de Strong, referências cruzadas, anotações, destaques, marcações e progresso de leitura.
 
-## Gerar o .ipa
+## Gerar o .ipa e o .apk
 
-Cada push na branch `main` dispara o workflow **Gerar .ipa (iOS, sem assinatura)** no GitHub Actions. Também dá para rodar manualmente em **Actions → Gerar .ipa → Run workflow**.
+Cada push na branch `main` dispara o workflow **Gerar .ipa e .apk** no GitHub Actions. Também dá para rodar manualmente em **Actions → Gerar .ipa e .apk → Run workflow**.
 
-Ao terminar, o `FluxBiblia.ipa` fica disponível em **Releases** (link direto da versão mais recente: `releases/latest/download/FluxBiblia.ipa`) e também como artefato na página da execução.
+Ao terminar, o `FluxBiblia.ipa` e o `FluxBiblia.apk` ficam disponíveis em **Releases** (links diretos da versão mais recente: `releases/latest/download/FluxBiblia.ipa` e `releases/latest/download/FluxBiblia.apk`) e também como artefatos na página da execução.
 
 ## Instalar no iPhone (Sideloadly)
 
@@ -17,6 +17,13 @@ Ao terminar, o `FluxBiblia.ipa` fica disponível em **Releases** (link direto da
 5. Se pedir, ative o Modo de Desenvolvedor em Ajustes → Privacidade e Segurança.
 
 Com Apple ID gratuito, a assinatura vale 7 dias; reinstale pelo Sideloadly depois disso.
+
+## Instalar no Android
+
+1. Baixe o `FluxBiblia.apk` no celular.
+2. Toque no arquivo e permita a instalação de apps dessa origem quando o Android pedir.
+
+O `.apk` é um build de debug: não expira, mas não serve para publicar na Play Store.
 
 ## Estrutura
 

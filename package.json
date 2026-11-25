@@ -6,9 +6,13 @@
   "scripts": {
     "ios:add": "cap add ios --packagemanager SPM || test -f ios/App/CapApp-SPM/Package.swift",
     "ios:assets": "capacitor-assets generate --ios --iconBackgroundColor '#4f46e5' --splashBackgroundColor '#f6f7fb' --splashBackgroundColorDark '#0e1118'",
-    "ios:sync": "cap sync ios"
+    "ios:sync": "cap sync ios",
+    "android:add": "cap add android || test -f android/gradlew",
+    "android:assets": "capacitor-assets generate --android --iconBackgroundColor '#4f46e5' --splashBackgroundColor '#f6f7fb' --splashBackgroundColorDark '#0e1118'",
+    "android:sync": "cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/ios": "^7.0.0"
   },

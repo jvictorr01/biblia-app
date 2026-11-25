@@ -1,4 +1,4 @@
-name: Gerar .ipa (iOS, sem assinatura)
+name: Gerar .ipa e .apk
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  ios:
     runs-on: macos-15
     timeout-minutes: 40
     steps:
@@ -69,11 +69,66 @@ jobs:
           path: FluxBiblia.ipa
           retention-days: 30
 
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+
+      - name: Criar projeto Android
+        run: npm run android:add
+
+      - name: Gerar ícones e splash
+        run: npm run android:assets
+
+      - name: Sincronizar app web
+        run: npm run android:sync
+
+      - name: Compilar .apk
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          sed -i -E "s/versionCode [0-9]+/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" app/build.gradle
+          grep -E "versionCode|versionName" app/build.gradle
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../FluxBiblia.apk
+          ls -lh ../FluxBiblia.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FluxBiblia-apk
+          path: FluxBiblia.apk
+          retention-days: 30
+
+  release:
+    needs: [ios, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
       - name: Publicar na página de Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Flux Biblia 1.0.${{ github.run_number }}
-          body: "Baixe o FluxBiblia.ipa abaixo e instale pelo Sideloadly com seu Apple ID."
-          files: FluxBiblia.ipa
+          body: |
+            - **iPhone:** baixe o FluxBiblia.ipa e instale pelo Sideloadly com seu Apple ID.
+            - **Android:** baixe o FluxBiblia.apk no celular e toque nele para instalar.
+          files: |
+            FluxBiblia.ipa
+            FluxBiblia.apk
           make_latest: true
