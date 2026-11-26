@@ -102,6 +102,11 @@ aside.open{display:block}
 .kv .val{line-height:1.55}
 .lk{color:var(--accent);font-weight:600;cursor:pointer}
 .lk:hover{text-decoration:underline}
+.com-sum{font-style:italic;color:var(--muted);line-height:1.55;margin:8px 0 4px}
+.com{font-family:var(--rfont);line-height:1.7}
+.com p{margin:0 0 12px}.com ul,.com ol{margin:0 0 12px;padding-left:22px}.com li{margin:4px 0}
+.com h4{font-family:Inter,sans-serif;margin:16px 0 6px}
+.com a{color:var(--accent)}
 .ilist .it{padding:10px 0;border-bottom:1px solid var(--line)}
 .ilist .it .r{font-weight:700;font-size:13px;color:var(--accent);cursor:pointer}
 .ilist .it .t{font-family:var(--rfont);line-height:1.55;margin-top:3px}
@@ -234,7 +239,7 @@ body.selecting .navfab{display:none}
 
 <div class="actbar" id="actbar">
   <div class="cnt" id="selCnt">1</div>
-  <button class="a" data-a="strong"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5"/></svg>Strong</button>
+  <button class="a" data-a="comment"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5"/></svg>Comentário</button>
   <button class="a" data-a="xref"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>Referências</button>
   <button class="a" data-a="note"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg>Anotar</button>
   <button class="a" data-a="hl-yellow"><span class="dot" style="background:#fde68a"></span>Amarelo</button>
@@ -423,10 +428,46 @@ $("#actbar").addEventListener("click", async e => {
     catch(err){ openModal("Copiar versículos", `<textarea class="ta" readonly>${esc(txt)}</textarea><p class="muted small">Selecione o texto e copie.</p>`); }
     clearSel(); return;
   }
-  if (a === "strong") return showVerseWords(b, c, vs[0]);
+  if (a === "comment") return showCommentary(b, c, vs[0]);
   if (a === "xref") return showXref(b, c, vs[0]);
   if (a === "note") return noteEditor(null, vs.map(v => key(b,c,v)));
 });
+
+/* ================= Comentário (TheBibleSays.com) ================= */
+const TBS_CODES = ["gen","exo","lev","num","deu","jos","jdg","rut","1sa","2sa","1ki","2ki","1ch","2ch","ezr","neh","est","job","psa","pro","ecc","sng","isa","jer","lam","ezk","dan","hos","jol","amo","oba","jon","mic","nam","hab","zep","hag","zec","mal","mat","mrk","luk","jhn","act","rom","1co","2co","gal","eph","php","col","1th","2th","1ti","2ti","tit","phm","heb","jas","1pe","2pe","1jn","2jn","3jn","jud","rev"];
+function commentaryUrl(b, c, v){ return `https://thebiblesays.com/pt/commentary/${TBS_CODES[b]}+${c}:${v}`; }
+async function openExternal(url){
+  const Br = window.Capacitor?.Plugins?.Browser;
+  if (Br) { try { await Br.open({ url, presentationStyle: "popover" }); return; } catch(e){} }
+  window.open(url, "_blank", "noopener");
+}
+// data/com/<b>.json: [[cap, vIni, vFim, titulo, resumo, html], ...] em ordem
+async function showCommentary(b, c, v, push){
+  if (!push) resetPanel();
+  openPanel("Comentário", `<div class="empty">Carregando…</div>`, false);
+  let list = [];
+  try { list = await load("com/" + b); } catch(e){}
+  const i = list.findIndex(e => e[0] === c && e[1] <= v && v <= e[2]);
+  const ext = `<button class="btn sm" id="comExt">Abrir no site</button>`;
+  if (i < 0){
+    openPanel(`Comentário · ${refShort(b,c,v)}`, `<div class="empty">Ainda não há comentário em português para ${refStr(b,c,v)}.</div><div class="row" style="justify-content:center">${ext}</div>`, true,
+      root => root.querySelector("#comExt").onclick = () => openExternal(commentaryUrl(b,c,v)));
+    return;
+  }
+  const [ec, vs, ve, , desc, body] = list[i], prev = list[i-1], next = list[i+1];
+  const nav = (e, lbl) => e ? `<button class="btn sm" data-com="${b}.${e[0]}.${e[1]}">${lbl}</button>` : `<span></span>`;
+  const h = `<div class="muted small">${refStr(b, ec, vs, ve > vs ? ve : 0)}</div>
+  ${desc ? `<p class="com-sum">${esc(desc)}</p>` : ""}
+  <div class="com">${body}</div>
+  <div class="row" style="justify-content:space-between;margin-top:18px">${nav(prev, "‹ Anterior")}<button class="btn sm" data-go="${key(b,ec,vs)}">Ir ao texto</button>${nav(next, "Próximo ›")}</div>
+  <p class="muted small" style="margin-top:16px">Comentário: <span class="lk" id="comSrc">TheBibleSays.com</span> (Português do Brasil).</p>`;
+  openPanel(`Comentário · ${refShort(b, ec, vs)}`, h, true, root => {
+    bindCodeLinks(root);
+    root.querySelectorAll("[data-com]").forEach(el => el.onclick = () => { const [rb, rc, rv] = el.dataset.com.split(".").map(Number); showCommentary(rb, rc, rv, true); });
+    root.querySelectorAll("a[data-ext]").forEach(el => el.onclick = ev => { ev.preventDefault(); openExternal(el.href); });
+    root.querySelector("#comSrc").onclick = () => openExternal(commentaryUrl(b, ec, vs));
+  });
+}
 
 /* ================= Painel lateral ================= */
 const panelStack = [];
