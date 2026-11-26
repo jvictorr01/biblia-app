@@ -121,7 +121,7 @@ aside.open{display:block}
 /* Selection action bar */
 .actbar{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);transition:transform .2s;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;padding:6px;display:flex;gap:2px;z-index:30;max-width:calc(100vw - 16px);overflow-x:auto}
 .actbar.show{transform:translateX(-50%) translateY(0)}
-.actbar .a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:600;color:var(--muted);min-width:58px}
+.actbar .a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:600;color:var(--muted);min-width:58px;flex-shrink:0;white-space:nowrap}
 .actbar .a:hover{background:var(--surface2);color:var(--text)}
 .actbar .cnt{align-self:center;padding:0 10px;font-weight:700;font-size:13px;white-space:nowrap}
 .dot{width:20px;height:20px;border-radius:50%;border:1px solid var(--line)}
@@ -238,7 +238,6 @@ body.selecting .navfab{display:none}
 <button class="navfab r" id="fabNext" title="Próximo capítulo"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
 
 <div class="actbar" id="actbar">
-  <div class="cnt" id="selCnt">1</div>
   <button class="a" data-a="comment"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5"/></svg>Comentário</button>
   <button class="a" data-a="xref"><svg viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>Referências</button>
   <button class="a" data-a="note"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg>Anotar</button>
@@ -382,10 +381,6 @@ function updAct(){
   const n = selected.size;
   $("#actbar").classList.toggle("show", n > 0);
   document.body.classList.toggle("selecting", n > 0);
-  if (n){
-    const vs = [...selected].sort((a,b)=>a-b);
-    $("#selCnt").textContent = `${B()[pos.b].a} ${pos.c}:${compactRange(vs)}`;
-  }
 }
 function compactRange(vs){
   const out = []; let s = vs[0], p = vs[0];
